@@ -18,7 +18,7 @@ public class AlbumService {
     private final HotplaceRepository hotplaceRepository;
 
     @Autowired
-    public AlbumService(AlbumRepository albumRepository, HotplaceRepository hotplaceRepository){
+    public AlbumService(AlbumRepository albumRepository, HotplaceRepository hotplaceRepository){   //HotplaceRepository hotplaceRepository
         this.albumRepository = albumRepository;
         this.hotplaceRepository = hotplaceRepository;
     }

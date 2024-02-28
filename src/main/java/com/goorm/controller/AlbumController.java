@@ -32,23 +32,24 @@ public class AlbumController {
     // 취향 등록
     @PostMapping("/collection/apply")
     public ResponseEntity<CandidateHotplaceResponseDto> tastePost(@RequestBody PostAlbumRequestDto postAlbumRequestDto) {
-        // 앨범 하나 생성후    //CandidateHotplaceResponseDto
+        // 앨범 하나 생성후
+        Integer id = albumService.postAlbum();
+
+        // 조건으로 필터링
         List<Integer> mapList = postAlbumRequestDto.getMapList();
         List<String> keywordList = postAlbumRequestDto.getKeywordList();
         // 활용해서 hotplacelist 생성하기
-
-        Integer id = albumService.postAlbum();
-        //List<Hotplace> hotplaceList= hotplaceService.getHotplaceList();
-
+        List<Hotplace> hotPlaces = hotplaceService.getHotplaceList(mapList, keywordList);
+        /*
         // dummy
         List<Hotplace> hotplaceList = new ArrayList<>();
         Hotplace hotplace1 = new Hotplace(1, 12345, "Seongsan Ilchulbong", 33.458, 126.940, "Seongsan Ilchulbong is an iconic volcanic tuff cone located on Jeju Island, South Korea.", "seongsan-ilchulbong.jpg");
-        hotplaceList.add(hotplace1);
+        hotplaceList.add(hotplace1);*/
 
         // json으로 합치기
         CandidateHotplaceResponseDto responseDTO = new CandidateHotplaceResponseDto();
         responseDTO.setId(id);
-        responseDTO.setHotplaceList(hotplaceList);
+        responseDTO.setHotplaceList(hotPlaces);
 
         return ResponseEntity.ok().body(responseDTO);
     }
