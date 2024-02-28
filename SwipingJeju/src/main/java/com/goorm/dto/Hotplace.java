@@ -16,8 +16,10 @@ import java.util.List;
 @Entity
 public class Hotplace {
     @Id
-    private Long hotplace_id;
+    private Integer hotplace_id;
 
+    @Column(length =20, nullable =false)
+    private Integer place_id;
     @Column(length =20, nullable =false)
     private String hotplace_title;
     @Column(nullable =false)
@@ -34,15 +36,16 @@ public class Hotplace {
 
     @ManyToMany
     @JoinTable(
-            name = "hotplace_keyword",
+            name = "KeywordHotplace",
             joinColumns = @JoinColumn(name = "hotplace_id"),
             inverseJoinColumns = @JoinColumn(name = "keyword_id")
     )
     private List<Keyword> keywords = new ArrayList<>();
 
     @Builder
-    public Hotplace(Long hotplace_id, String hotplace_title, double hotplace_longtitude, double hotplace_latitude, String hotplace_content, String hotplace_img){
+    public Hotplace(Integer hotplace_id, Integer place_id, String hotplace_title, double hotplace_longtitude, double hotplace_latitude, String hotplace_content, String hotplace_img){
         this.hotplace_id = hotplace_id;
+        this.place_id = place_id;
         this.hotplace_title = hotplace_title;
         this.hotplace_longtitude = hotplace_longtitude;
         this.hotplace_latitude = hotplace_latitude;

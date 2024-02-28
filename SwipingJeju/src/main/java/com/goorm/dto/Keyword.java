@@ -19,7 +19,7 @@ import java.util.List;
 @Entity
 public class Keyword {
     @Id
-    private Long keyword_id;
+    private Integer keyword_id;
 
     @Column(length =20, nullable =false)
     private String keyworld_title;
@@ -28,7 +28,7 @@ public class Keyword {
     private List<Hotplace> hotplaces = new ArrayList<>();
 
     @Builder
-    public Keyword(Long keyword_id, String keyworld_title){
+    public Keyword(Integer keyword_id, String keyworld_title){
         this.keyword_id = keyword_id;
         this.keyworld_title = keyworld_title;
     }

@@ -1,59 +1,75 @@
 package com.goorm.controller;
 
 
-import com.goorm.dto.Album;
-import com.goorm.dto.Hotplace;
+import com.goorm.dto.*;
 import com.goorm.service.AlbumService;
+import com.goorm.service.HotplaceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 public class AlbumController {
     private final AlbumService albumService;
+    private final HotplaceService hotplaceService;
 
     @Autowired
-    public AlbumController(AlbumService albumService){
+    public AlbumController(AlbumService albumService, HotplaceService hotplaceService){
         this.albumService = albumService;
+        this.hotplaceService = hotplaceService;
     }
     @GetMapping("/cnt")
-    public ResponseEntity<Long> getAlbumCount(){
-        Long cnt = albumService.getAlbumCount();
+    public ResponseEntity<String> getAlbumCount(){
+        Integer cnt = albumService.getAlbumCount();
         // db 에서 앨범 총갯수 세기
-        return ResponseEntity.ok().body(cnt);
+        String jsonResponse = "{\"cnt\": " + cnt + "}";
+        return ResponseEntity.ok().body(jsonResponse);
     }
 
     // 취향 등록
     @PostMapping("/collection/apply")
-    public ResponseEntity<String> tastePost() {  //List<Hotplace>
-        // 앨범 하나 생성후
-        // 받은 취향 싹 다 등록하기 (관심지역 / 자연어 취향)
-        String taste = "취향";
-        System.out.println("취향");
-        return ResponseEntity.ok().body(taste);
+    public ResponseEntity<CandidateHotplaceResponseDto> tastePost(@RequestBody PostAlbumRequestDto postAlbumRequestDto) {
+        // 앨범 하나 생성후    //CandidateHotplaceResponseDto
+        List<Integer> mapList = postAlbumRequestDto.getMapList();
+        List<String> keywordList = postAlbumRequestDto.getKeywordList();
+        // 활용해서 hotplacelist 생성하기
+
+        Integer id = albumService.postAlbum();
+        //List<Hotplace> hotplaceList= hotplaceService.getHotplaceList();
+
+        // dummy
+        List<Hotplace> hotplaceList = new ArrayList<>();
+        Hotplace hotplace1 = new Hotplace(1, 12345, "Seongsan Ilchulbong", 33.458, 126.940, "Seongsan Ilchulbong is an iconic volcanic tuff cone located on Jeju Island, South Korea.", "seongsan-ilchulbong.jpg");
+        hotplaceList.add(hotplace1);
+
+        // json으로 합치기
+        CandidateHotplaceResponseDto responseDTO = new CandidateHotplaceResponseDto();
+        responseDTO.setId(id);
+        responseDTO.setHotplaceList(hotplaceList);
+
+        return ResponseEntity.ok().body(responseDTO);
     }
 
-    // 선택지 반영
+    // 선택지 반영 / 총 앨범 만들기
     @PostMapping ("/collection/create")
-    public ResponseEntity<String> albumPost(){
+    public ResponseEntity<Void> albumPost(@RequestBody PatchAlbumRequestDto patchAlbumRequestDto){
+       // 최단거리 알고리즘 돌린 후 정렬한 리스트 반환
 
-        // 최단거리 알고리즘 돌린 후정렬한 리스트 반환
-        // 그 리스트 db 에 등록
-        String album = "";
-        return ResponseEntity.ok(album);
+        // 정리된 리스트를 post (db 에 등록)
+        albumService.postAlbumHotplaces(patchAlbumRequestDto);
+
+        return ResponseEntity.ok().build();
     }
 
     //총 앨범 반환
     @GetMapping("/collection")
-    public ResponseEntity<String> albumResult(@RequestParam("uid") int id){ // Album
+    public ResponseEntity<Album> albumResult(@RequestParam("uid") Integer id){
         // 앨범 모든 정보 다 토해내기
-        String album = "";
-        // 이 여행자는 어떤 스타일인지 ai 돌려서 반환
+        Album album = albumService.getAlbum(id);
+        // 최단거리 알고리즘 적용해서 재정렬
         return ResponseEntity.ok().body(album);
     }
 
