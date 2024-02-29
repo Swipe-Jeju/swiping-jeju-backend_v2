@@ -21,6 +21,12 @@ public class AlbumController {
         this.albumService = albumService;
         this.hotplaceService = hotplaceService;
     }
+
+    @GetMapping("/test")
+    public ResponseEntity<String> test(){
+        return ResponseEntity.ok().body("True");
+    }
+
     @GetMapping("/cnt")
     public ResponseEntity<String> getAlbumCount(){
         Integer cnt = albumService.getAlbumCount();
