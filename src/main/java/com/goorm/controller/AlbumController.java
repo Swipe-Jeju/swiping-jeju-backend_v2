@@ -1,19 +1,22 @@
 package com.goorm.controller;
 
-
 import com.goorm.domain.Album;
 import com.goorm.domain.Hotplace;
 import com.goorm.dto.*;
 import com.goorm.service.AlbumService;
 import com.goorm.service.HotplaceService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+
+//@RequiredArgsConstructor
 @RestController
 public class AlbumController {
+
     private final AlbumService albumService;
     private final HotplaceService hotplaceService;
 
@@ -28,17 +31,20 @@ public class AlbumController {
         return ResponseEntity.ok().body("True");
     }
 
+    // 1. 앨범 총 갯수 반환
     @GetMapping("/cnt")
-    public ResponseEntity<String> getAlbumCount(){
+    public ResponseEntity<String> getAlbumCount() {
         Integer cnt = albumService.getAlbumCount();
         // db 에서 앨범 총갯수 세기
         String jsonResponse = "{\"cnt\": " + cnt + "}";
         return ResponseEntity.ok().body(jsonResponse);
     }
 
-    // 취향 등록
+    // 2. 취향 등록 & 후보 핫플리스트 반환
     @PostMapping("/album/apply")
     public ResponseEntity<PostAlbumResponseDto> tastePost(@RequestBody PostAlbumRequestDto postAlbumRequestDto) {
+        PostAlbumResponseDto responseDTO = new PostAlbumResponseDto();
+
         // 앨범 하나 생성후
         Integer id = albumService.postAlbum();
 
@@ -54,16 +60,15 @@ public class AlbumController {
         hotplaceList.add(hotplace1);*/
 
         // json으로 합치기
-        PostAlbumResponseDto responseDTO = new PostAlbumResponseDto();
         responseDTO.setId(id);
         //responseDTO.setHotPlaceList(hotplaces);
 
         return ResponseEntity.ok().body(responseDTO);
     }
 
-    // 선택지 반영 / 총 앨범 만들기
+    // 3. 선택 핫플리스트 반영 & 최종 앨범 만들기
     @PostMapping ("/album/create")
-    public ResponseEntity<Void> albumPost(@RequestBody PatchAlbumRequestDto patchAlbumRequestDto){
+    public ResponseEntity<Void> albumPost(@RequestBody PatchAlbumRequestDto patchAlbumRequestDto) {
        // 최단거리 알고리즘 돌린 후 정렬한 리스트 반환
 
         // 정리된 리스트를 post (db 에 등록)
@@ -71,13 +76,14 @@ public class AlbumController {
         return ResponseEntity.ok().build();
     }
 
-    //총 앨범 반환
+    // 4. 앨범 최종 결과 반환
     @GetMapping("/album/result")
-    public ResponseEntity<Album> albumResult(@RequestParam("id") Integer id){
+    public ResponseEntity<GetAlbumResultResponseDto> albumResult(@RequestParam("id") Integer id) {
+        GetAlbumResultResponseDto albumResult = new GetAlbumResultResponseDto();
         // 앨범 모든 정보 다 토해내기
         Album album = albumService.getAlbum(id);
         // 최단거리 알고리즘 적용해서 재정렬
-        return ResponseEntity.ok().body(album);
+        return ResponseEntity.ok().body(albumResult);
     }
 
 }
