@@ -7,7 +7,6 @@ import java.util.List;
 
 
 @Repository
-public interface HotplaceRepository extends JpaRepository<Hotplace, Integer>{
+public interface KeywordRepository extends JpaRepository<Keyword, Integer> {
     // automatically, create basic JPA CRUD by Jparepository
-    List<Hotplace> findByRegion(Integer regionId);
 }
