@@ -38,7 +38,7 @@ public class AlbumController {
 
     // 취향 등록
     @PostMapping("/album/apply")
-    public ResponseEntity<CandidateHotplaceResponseDto> tastePost(@RequestBody PostAlbumRequestDto postAlbumRequestDto) {
+    public ResponseEntity<PostAlbumResponseDto> tastePost(@RequestBody PostAlbumRequestDto postAlbumRequestDto) {
         // 앨범 하나 생성후
         Integer id = albumService.postAlbum();
 
@@ -46,7 +46,7 @@ public class AlbumController {
         List<Integer> mapList = postAlbumRequestDto.getMapList();
         List<String> keywordList = postAlbumRequestDto.getKeywordList();
         // 활용해서 hotplacelist 생성하기
-        List<Hotplace> hotPlaces = hotplaceService.getHotplaceList(mapList, keywordList);
+        List<Hotplace> hotplaces = hotplaceService.getHotplaceList(mapList, keywordList);
         /*
         // dummy
         List<Hotplace> hotplaceList = new ArrayList<>();
@@ -54,9 +54,9 @@ public class AlbumController {
         hotplaceList.add(hotplace1);*/
 
         // json으로 합치기
-        CandidateHotplaceResponseDto responseDTO = new CandidateHotplaceResponseDto();
+        PostAlbumResponseDto responseDTO = new PostAlbumResponseDto();
         responseDTO.setId(id);
-        responseDTO.setHotplaceList(hotPlaces);
+        //responseDTO.setHotPlaceList(hotplaces);
 
         return ResponseEntity.ok().body(responseDTO);
     }

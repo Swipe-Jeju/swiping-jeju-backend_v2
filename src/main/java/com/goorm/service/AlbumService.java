@@ -1,28 +1,32 @@
 package com.goorm.service;
 
-
 import com.goorm.domain.AlbumRepository;
 import com.goorm.domain.HotplaceRepository;
 import com.goorm.domain.Album;
 import com.goorm.domain.Hotplace;
 import com.goorm.dto.PatchAlbumRequestDto;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
+
+//@RequiredArgsConstructor
 @Service
 public class AlbumService {
     private final AlbumRepository albumRepository;
     private final HotplaceRepository hotplaceRepository;
 
     @Autowired
-    public AlbumService(AlbumRepository albumRepository, HotplaceRepository hotplaceRepository){   //HotplaceRepository hotplaceRepository
+    public AlbumService(AlbumRepository albumRepository, HotplaceRepository hotplaceRepository) {
         this.albumRepository = albumRepository;
         this.hotplaceRepository = hotplaceRepository;
     }
 
+    @Transactional
     public Integer getAlbumCount(){
         long cnt = albumRepository.count();
         return Math.toIntExact(cnt);
@@ -38,10 +42,10 @@ public class AlbumService {
 
     public void postAlbumHotplaces(PatchAlbumRequestDto patchAlbumRequestDto){
           // 해당하는 앨범에,
-        Integer album_id = patchAlbumRequestDto.getAlbumID();
-        List<Integer> hotplaceIds = patchAlbumRequestDto.getMapList();
-        String album_title = patchAlbumRequestDto.getAlbumTitle();
-        String album_content = patchAlbumRequestDto.getAlbumContent();
+        Integer album_id = patchAlbumRequestDto.getId();
+        List<Integer> hotplaceIds = patchAlbumRequestDto.getLikeIdList();
+        String album_title = patchAlbumRequestDto.getTitle();
+        String album_content = patchAlbumRequestDto.getContent();
 
         Optional<Album> optionalAlbum = albumRepository.findById(album_id);
 
@@ -71,7 +75,6 @@ public class AlbumService {
             // 예외처리
         }
     }
-
 
     public Album getAlbum(Integer album_id){
         Optional<Album> albumOptional = albumRepository.findById(album_id);
