@@ -1,5 +1,6 @@
 package com.goorm.dto;
 
+import com.goorm.domain.Hotplace;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -3,8 +3,8 @@ package com.goorm.service;
 
 import com.goorm.domain.AlbumRepository;
 import com.goorm.domain.HotplaceRepository;
-import com.goorm.dto.Album;
-import com.goorm.dto.Hotplace;
+import com.goorm.domain.Album;
+import com.goorm.domain.Hotplace;
 import com.goorm.dto.PatchAlbumRequestDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

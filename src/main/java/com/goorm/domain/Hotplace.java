@@ -1,4 +1,4 @@
-package com.goorm.dto;
+package com.goorm.domain;
 
 import jakarta.persistence.*;
 

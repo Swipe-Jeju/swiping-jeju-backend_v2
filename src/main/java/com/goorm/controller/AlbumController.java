@@ -1,6 +1,8 @@
 package com.goorm.controller;
 
 
+import com.goorm.domain.Album;
+import com.goorm.domain.Hotplace;
 import com.goorm.dto.*;
 import com.goorm.service.AlbumService;
 import com.goorm.service.HotplaceService;
@@ -8,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -36,7 +37,7 @@ public class AlbumController {
     }
 
     // 취향 등록
-    @PostMapping("/collection/apply")
+    @PostMapping("/album/apply")
     public ResponseEntity<CandidateHotplaceResponseDto> tastePost(@RequestBody PostAlbumRequestDto postAlbumRequestDto) {
         // 앨범 하나 생성후
         Integer id = albumService.postAlbum();
@@ -61,19 +62,18 @@ public class AlbumController {
     }
 
     // 선택지 반영 / 총 앨범 만들기
-    @PostMapping ("/collection/create")
+    @PostMapping ("/album/create")
     public ResponseEntity<Void> albumPost(@RequestBody PatchAlbumRequestDto patchAlbumRequestDto){
        // 최단거리 알고리즘 돌린 후 정렬한 리스트 반환
 
         // 정리된 리스트를 post (db 에 등록)
         albumService.postAlbumHotplaces(patchAlbumRequestDto);
-
         return ResponseEntity.ok().build();
     }
 
     //총 앨범 반환
-    @GetMapping("/collection")
-    public ResponseEntity<Album> albumResult(@RequestParam("uid") Integer id){
+    @GetMapping("/album/result")
+    public ResponseEntity<Album> albumResult(@RequestParam("id") Integer id){
         // 앨범 모든 정보 다 토해내기
         Album album = albumService.getAlbum(id);
         // 최단거리 알고리즘 적용해서 재정렬

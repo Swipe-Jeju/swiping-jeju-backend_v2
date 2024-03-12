@@ -1,5 +1,6 @@
-package com.goorm.dto;
+package com.goorm.domain;
 
+import com.goorm.domain.Hotplace;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 

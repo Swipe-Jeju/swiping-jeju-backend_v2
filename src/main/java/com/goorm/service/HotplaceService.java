@@ -1,7 +1,7 @@
 package com.goorm.service;
 
 import com.goorm.domain.HotplaceRepository;
-import com.goorm.dto.Hotplace;
+import com.goorm.domain.Hotplace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

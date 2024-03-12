@@ -9,6 +9,7 @@ import java.util.List;
 @Getter
 @Setter
 public class PostAlbumRequestDto {
+
     private List<Integer> mapList;
     private List<String> keywordList;
 
