@@ -19,7 +19,7 @@ public class Hotplace {
     private Integer hotplace_id;
 
     @Column(length=10, nullable=false)
-    private Integer region_id;
+    private Integer region;
 
     @Column(length=20, nullable=false)
     private String hotplace_title;
@@ -57,11 +57,11 @@ public class Hotplace {
     private List<Keyword> keywords = new ArrayList<>();
 
     @Builder
-    public Hotplace(Integer hotplace_id, Integer region_id, String hotplace_title, double hotplace_latitude,
+    public Hotplace(Integer hotplace_id, Integer region, String hotplace_title, double hotplace_latitude,
                     double hotplace_longitude, String hotplace_content, String hotplace_img, Integer hotplace_view,
                     Integer hotplace_like, Integer hotplace_dislike){
         this.hotplace_id = hotplace_id;
-        this.region_id = region_id;
+        this.region = region;
         this.hotplace_title = hotplace_title;
         this.hotplace_latitude = hotplace_latitude;
         this.hotplace_longitude = hotplace_longitude;
