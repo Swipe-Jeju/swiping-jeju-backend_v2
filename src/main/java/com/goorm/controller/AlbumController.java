@@ -1,16 +1,11 @@
 package com.goorm.controller;
 
-import com.goorm.domain.Album;
-import com.goorm.domain.Hotplace;
 import com.goorm.dto.*;
 import com.goorm.service.AlbumService;
-import com.goorm.service.HotplaceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 
 //@RequiredArgsConstructor
@@ -18,12 +13,10 @@ import java.util.List;
 public class AlbumController {
 
     private final AlbumService albumService;
-    private final HotplaceService hotplaceService;
 
     @Autowired
-    public AlbumController(AlbumService albumService, HotplaceService hotplaceService){
+    public AlbumController(AlbumService albumService){
         this.albumService = albumService;
-        this.hotplaceService = hotplaceService;
     }
 
     @GetMapping("/test")

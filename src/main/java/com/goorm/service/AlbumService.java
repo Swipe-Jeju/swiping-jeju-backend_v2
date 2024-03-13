@@ -1,7 +1,6 @@
 package com.goorm.service;
 
 import com.goorm.domain.AlbumRepository;
-import com.goorm.domain.HotplaceRepository;
 import com.goorm.domain.Album;
 import com.goorm.domain.Hotplace;
 import com.goorm.dto.*;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,26 +21,25 @@ public class AlbumService {
 
     @Autowired
     private final AlbumRepository albumRepository;
-    @Autowired
-    private final HotplaceRepository hotplaceRepository;
 
+    private final HotplaceService hotplaceService;
     private ModelMapper modelMapper;
 
     @Autowired
-    public AlbumService(AlbumRepository albumRepository, HotplaceRepository hotplaceRepository) {
+    public AlbumService(AlbumRepository albumRepository, HotplaceService hotplaceService) {
         this.albumRepository = albumRepository;
-        this.hotplaceRepository = hotplaceRepository;
+        this.hotplaceService = hotplaceService;
         this.modelMapper = new ModelMapper();
     }
 
     // 1. 앨범 카운트 반환
-    @Transactional
     public Integer getAlbumCount(){
         long cnt = albumRepository.count();
         return Math.toIntExact(cnt);
     }
 
     // 2. 앨범 최초 생성
+    @Transactional
     public PostAlbumResponseDto postAlbum(PostAlbumRequestDto postAlbumRequestDto){
         PostAlbumResponseDto postAlbumResponseDto = new PostAlbumResponseDto();
 
@@ -52,34 +49,10 @@ public class AlbumService {
         Integer id = savedAlbum.getAlbum_id();
         postAlbumResponseDto.setId(id);
         // 추천 Hotplace 반환
-        List<Hotplace> hotplaces = curateHotplaces(postAlbumRequestDto);
+        List<Hotplace> hotplaces = hotplaceService.curateHotplaces(postAlbumRequestDto);
         postAlbumResponseDto.setHotPlaceList(hotplaces);
 
         return postAlbumResponseDto;
-    }
-
-    // 2. 선택지역 & 키워드에 따른 Hotplaces 반환
-    public List<Hotplace> curateHotplaces(PostAlbumRequestDto postAlbumRequestDto){
-        List<Hotplace> curatedHotplaces = new ArrayList<>();
-
-        List<Integer> regions = postAlbumRequestDto.getMapList();
-        List<String> keywords = postAlbumRequestDto.getKeywordList();
-
-        for(Integer region : regions){
-            List<Hotplace> hotplacesByRegion = hotplaceRepository.findByRegion(region);
-
-            for(Hotplace hotplace : hotplacesByRegion) {
-                for(String keyword : keywords) {
-                    if(hotplace.getKeywords().contains(keyword)) {
-                        curatedHotplaces.add(hotplace);
-                        break;
-                    }
-                }
-            }
-        }
-
-        // 10개만 짜르기 (랜덤)
-        return curatedHotplaces;
     }
 
     // 3. 앨범 최종 저장
@@ -90,7 +63,7 @@ public class AlbumService {
         String title = patchAlbumRequestDto.getTitle();
         String content = patchAlbumRequestDto.getContent();
         List<Integer> hids = patchAlbumRequestDto.getLikeIdList();
-        List<Hotplace> hotplaces = getHotplaces(hids);
+        List<Hotplace> hotplaces = hotplaceService.getHotplaces(hids);
 
         // Dto -> Entity -> save
         Optional<Album> optionalAlbum = albumRepository.findById(aid);  // to avoid NullPointerException
@@ -118,23 +91,6 @@ public class AlbumService {
         // ? need check HotplaceLists Setting
 
         return album;
-    }
-
-    // [Entity] Hotplaces List
-    public List<Hotplace> getHotplaces(List<Integer> hids){
-        List<Hotplace> hotplaces = new ArrayList<>();
-
-        for(Integer hid : hids) {
-            Optional<Hotplace> hotplaceOptional = hotplaceRepository.findById(hid);
-            if (hotplaceOptional.isPresent()) {
-                Hotplace hotplace = hotplaceOptional.get();
-                hotplaces.add(hotplace);
-            } else {
-                throw new EntityNotFoundException("Hotplace Id: " + hid + "not found");
-            }
-        }
-
-        return hotplaces;
     }
 
 }
