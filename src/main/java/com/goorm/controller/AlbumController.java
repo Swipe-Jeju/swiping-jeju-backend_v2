@@ -79,11 +79,11 @@ public class AlbumController {
     // 4. 앨범 최종 결과 반환
     @GetMapping("/album/result")
     public ResponseEntity<GetAlbumResultResponseDto> albumResult(@RequestParam("id") Integer id) {
-        GetAlbumResultResponseDto albumResult = new GetAlbumResultResponseDto();
         // 앨범 모든 정보 다 토해내기
-        Album album = albumService.getAlbum(id);
+        GetAlbumResultResponseDto getAlbumResultResponseDto = albumService.getAlbum(id);
+
         // 최단거리 알고리즘 적용해서 재정렬
-        return ResponseEntity.ok().body(albumResult);
+        return ResponseEntity.ok().body(getAlbumResultResponseDto);
     }
 
 }

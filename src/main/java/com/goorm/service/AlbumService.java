@@ -4,12 +4,16 @@ import com.goorm.domain.AlbumRepository;
 import com.goorm.domain.HotplaceRepository;
 import com.goorm.domain.Album;
 import com.goorm.domain.Hotplace;
+import com.goorm.dto.GetAlbumResultResponseDto;
+import com.goorm.dto.HotplaceDto;
 import com.goorm.dto.PatchAlbumRequestDto;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,13 +21,19 @@ import java.util.Optional;
 //@RequiredArgsConstructor
 @Service
 public class AlbumService {
+
+    @Autowired
     private final AlbumRepository albumRepository;
+    @Autowired
     private final HotplaceRepository hotplaceRepository;
+
+    private ModelMapper modelMapper;
 
     @Autowired
     public AlbumService(AlbumRepository albumRepository, HotplaceRepository hotplaceRepository) {
         this.albumRepository = albumRepository;
         this.hotplaceRepository = hotplaceRepository;
+        this.modelMapper = new ModelMapper();
     }
 
     @Transactional
@@ -76,8 +86,33 @@ public class AlbumService {
         }
     }
 
-    public Album getAlbum(Integer album_id){
-        Optional<Album> albumOptional = albumRepository.findById(album_id);
-        return albumOptional.orElse(null);
+
+    // 4. 최종앨범으로 반환할 album result
+    public GetAlbumResultResponseDto getAlbum(Integer aid) {
+        // 앨범 세팅
+        Optional<Album> albumOptional = albumRepository.findById(aid);
+        GetAlbumResultResponseDto album = modelMapper.map(albumOptional, GetAlbumResultResponseDto.class);
+
+        // 핫플리스트 세팅
+        List<Integer> hids = new ArrayList<>();
+        // ?? hids 를 가져올 부분 필요!
+        List<HotplaceDto> hotplaces = getHotplaceList(hids);
+
+        album.setHotPlaceList(hotplaces);
+
+        return album;
+    }
+
+    // 4. 최종앨범에 포함된 hotplace list
+    public List<HotplaceDto> getHotplaceList(List<Integer> hids){
+        List<HotplaceDto> hotplaces = new ArrayList<>();
+
+        for(Integer hid : hids) {
+            Optional<Hotplace> hotplaceOptional = hotplaceRepository.findById(hid);
+                //.orElseThrow(() -> new EntityNotFoundException("Person not found with id: " + id))
+            hotplaceOptional.ifPresent( hotplace -> hotplaces.add(modelMapper.map(hotplace, HotplaceDto.class)));
+        }
+
+        return hotplaces;//.orElse(null);
     }
 }
