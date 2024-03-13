@@ -7,6 +7,7 @@ import com.goorm.domain.Hotplace;
 import com.goorm.dto.GetAlbumResultResponseDto;
 import com.goorm.dto.HotplaceDto;
 import com.goorm.dto.PatchAlbumRequestDto;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,83 +37,73 @@ public class AlbumService {
         this.modelMapper = new ModelMapper();
     }
 
+    // 1. 앨범 카운트 반환
     @Transactional
     public Integer getAlbumCount(){
         long cnt = albumRepository.count();
         return Math.toIntExact(cnt);
     }
 
+    // 2. 앨범 최초 생성
     public Integer postAlbum(){
         Album album = new Album();
         Album savedAlbum = albumRepository.save(album);
         return savedAlbum.getAlbum_id();
     }
 
+    // 3. 앨범 최종 저장
+    @Transactional
+    public void saveAlbum(PatchAlbumRequestDto patchAlbumRequestDto) {
+        // Dto 해체
+        Integer aid = patchAlbumRequestDto.getId();
+        String title = patchAlbumRequestDto.getTitle();
+        String content = patchAlbumRequestDto.getContent();
+        List<Integer> hids = patchAlbumRequestDto.getLikeIdList();
+        List<Hotplace> hotplaces = getHotplaces(hids);
 
+        // Dto -> Entity -> save
+        Optional<Album> optionalAlbum = albumRepository.findById(aid);  // to avoid NullPointerException
 
-    public void postAlbumHotplaces(PatchAlbumRequestDto patchAlbumRequestDto){
-          // 해당하는 앨범에,
-        Integer album_id = patchAlbumRequestDto.getId();
-        List<Integer> hotplaceIds = patchAlbumRequestDto.getLikeIdList();
-        String album_title = patchAlbumRequestDto.getTitle();
-        String album_content = patchAlbumRequestDto.getContent();
-
-        Optional<Album> optionalAlbum = albumRepository.findById(album_id);
-
-        if(optionalAlbum.isPresent()){
+        if (optionalAlbum.isPresent()){
             Album album = optionalAlbum.get();
 
-            album.setAlbum_title(album_title);
-            album.setAlbum_content(album_content);
+            album.setAlbum_title(title);
+            album.setAlbum_content(content);
+            album.setHotplaces(hotplaces);
 
-            // 최단거리 경로로 재설정 한 후에 반환해야됨
-
-            // 받은 모든 핫플에 대해,
-            for(Integer hotplaceId :hotplaceIds){
-                Optional<Hotplace> optionalHotplace = hotplaceRepository.findById(hotplaceId);
-                if(optionalHotplace.isPresent()){
-                    Hotplace hotplace = optionalHotplace.get();
-
-                    // 메인로직  - hotplace list 추가
-                    album.getHotplaces().add(hotplace);
-
-                }else{
-                    // 예외처리
-                }
-
-            }
-        } else {
-            // 예외처리
+            albumRepository.save(album);
+        }else{
+            throw new EntityNotFoundException("Album Id: " + aid + "not found");
         }
+
+        // 최단거리 알고리즘 돌린 후 정렬한 HotplaceList 저장 필요
     }
 
 
     // 4. 최종앨범으로 반환할 album result
     public GetAlbumResultResponseDto getAlbum(Integer aid) {
-        // 앨범 세팅
         Optional<Album> albumOptional = albumRepository.findById(aid);
         GetAlbumResultResponseDto album = modelMapper.map(albumOptional, GetAlbumResultResponseDto.class);
-
-        // 핫플리스트 세팅
-        List<Integer> hids = new ArrayList<>();
-        // ?? hids 를 가져올 부분 필요!
-        List<HotplaceDto> hotplaces = getHotplaceList(hids);
-
-        album.setHotPlaceList(hotplaces);
+        // ? need check HotplaceLists Setting
 
         return album;
     }
 
-    // 4. 최종앨범에 포함된 hotplace list
-    public List<HotplaceDto> getHotplaceList(List<Integer> hids){
-        List<HotplaceDto> hotplaces = new ArrayList<>();
+    // [Entity] Hotplaces List
+    public List<Hotplace> getHotplaces(List<Integer> hids){
+        List<Hotplace> hotplaces = new ArrayList<>();
 
         for(Integer hid : hids) {
             Optional<Hotplace> hotplaceOptional = hotplaceRepository.findById(hid);
-                //.orElseThrow(() -> new EntityNotFoundException("Person not found with id: " + id))
-            hotplaceOptional.ifPresent( hotplace -> hotplaces.add(modelMapper.map(hotplace, HotplaceDto.class)));
+            if (hotplaceOptional.isPresent()) {
+                Hotplace hotplace = hotplaceOptional.get();
+                hotplaces.add(hotplace);
+            } else {
+                throw new EntityNotFoundException("Hotplace Id: " + hid + "not found");
+            }
         }
 
-        return hotplaces;//.orElse(null);
+        return hotplaces;
     }
+
 }

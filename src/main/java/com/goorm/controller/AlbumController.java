@@ -69,20 +69,14 @@ public class AlbumController {
     // 3. 선택 핫플리스트 반영 & 최종 앨범 만들기
     @PostMapping ("/album/create")
     public ResponseEntity<Void> albumPost(@RequestBody PatchAlbumRequestDto patchAlbumRequestDto) {
-       // 최단거리 알고리즘 돌린 후 정렬한 리스트 반환
-
-        // 정리된 리스트를 post (db 에 등록)
-        albumService.postAlbumHotplaces(patchAlbumRequestDto);
+        albumService.saveAlbum(patchAlbumRequestDto);
         return ResponseEntity.ok().build();
     }
 
     // 4. 앨범 최종 결과 반환
     @GetMapping("/album/result")
     public ResponseEntity<GetAlbumResultResponseDto> albumResult(@RequestParam("id") Integer id) {
-        // 앨범 모든 정보 다 토해내기
         GetAlbumResultResponseDto getAlbumResultResponseDto = albumService.getAlbum(id);
-
-        // 최단거리 알고리즘 적용해서 재정렬
         return ResponseEntity.ok().body(getAlbumResultResponseDto);
     }
 
