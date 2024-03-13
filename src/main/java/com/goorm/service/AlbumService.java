@@ -4,9 +4,7 @@ import com.goorm.domain.AlbumRepository;
 import com.goorm.domain.HotplaceRepository;
 import com.goorm.domain.Album;
 import com.goorm.domain.Hotplace;
-import com.goorm.dto.GetAlbumResultResponseDto;
-import com.goorm.dto.HotplaceDto;
-import com.goorm.dto.PatchAlbumRequestDto;
+import com.goorm.dto.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -45,10 +43,43 @@ public class AlbumService {
     }
 
     // 2. 앨범 최초 생성
-    public Integer postAlbum(){
+    public PostAlbumResponseDto postAlbum(PostAlbumRequestDto postAlbumRequestDto){
+        PostAlbumResponseDto postAlbumResponseDto = new PostAlbumResponseDto();
+
+        // 앨범 생성
         Album album = new Album();
         Album savedAlbum = albumRepository.save(album);
-        return savedAlbum.getAlbum_id();
+        Integer id = savedAlbum.getAlbum_id();
+        postAlbumResponseDto.setId(id);
+        // 추천 Hotplace 반환
+        List<Hotplace> hotplaces = curateHotplaces(postAlbumRequestDto);
+        postAlbumResponseDto.setHotPlaceList(hotplaces);
+
+        return postAlbumResponseDto;
+    }
+
+    // 2. 선택지역 & 키워드에 따른 Hotplaces 반환
+    public List<Hotplace> curateHotplaces(PostAlbumRequestDto postAlbumRequestDto){
+        List<Hotplace> curatedHotplaces = new ArrayList<>();
+
+        List<Integer> regions = postAlbumRequestDto.getMapList();
+        List<String> keywords = postAlbumRequestDto.getKeywordList();
+
+        for(Integer region : regions){
+            List<Hotplace> hotplacesByRegion = hotplaceRepository.findByRegion(region);
+
+            for(Hotplace hotplace : hotplacesByRegion) {
+                for(String keyword : keywords) {
+                    if(hotplace.getKeywords().contains(keyword)) {
+                        curatedHotplaces.add(hotplace);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // 10개만 짜르기 (랜덤)
+        return curatedHotplaces;
     }
 
     // 3. 앨범 최종 저장

@@ -42,28 +42,10 @@ public class AlbumController {
 
     // 2. 취향 등록 & 후보 핫플리스트 반환
     @PostMapping("/album/apply")
-    public ResponseEntity<PostAlbumResponseDto> tastePost(@RequestBody PostAlbumRequestDto postAlbumRequestDto) {
-        PostAlbumResponseDto responseDTO = new PostAlbumResponseDto();
+    public ResponseEntity<PostAlbumResponseDto> albumCreate(@RequestBody PostAlbumRequestDto postAlbumRequestDto) {
+        PostAlbumResponseDto postAlbumResponseDto = albumService.postAlbum(postAlbumRequestDto);
 
-        // 앨범 하나 생성후
-        Integer id = albumService.postAlbum();
-
-        // 조건으로 필터링
-        List<Integer> mapList = postAlbumRequestDto.getMapList();
-        List<String> keywordList = postAlbumRequestDto.getKeywordList();
-        // 활용해서 hotplacelist 생성하기
-        List<Hotplace> hotplaces = hotplaceService.getHotplaceList(mapList, keywordList);
-        /*
-        // dummy
-        List<Hotplace> hotplaceList = new ArrayList<>();
-        Hotplace hotplace1 = new Hotplace(1, 12345, "Seongsan Ilchulbong", 33.458, 126.940, "Seongsan Ilchulbong is an iconic volcanic tuff cone located on Jeju Island, South Korea.", "seongsan-ilchulbong.jpg");
-        hotplaceList.add(hotplace1);*/
-
-        // json으로 합치기
-        responseDTO.setId(id);
-        //responseDTO.setHotPlaceList(hotplaces);
-
-        return ResponseEntity.ok().body(responseDTO);
+        return ResponseEntity.ok().body(postAlbumResponseDto);
     }
 
     // 3. 선택 핫플리스트 반영 & 최종 앨범 만들기
