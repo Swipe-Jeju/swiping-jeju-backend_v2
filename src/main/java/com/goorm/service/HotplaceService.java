@@ -2,11 +2,13 @@ package com.goorm.service;
 
 import com.goorm.domain.HotplaceRepository;
 import com.goorm.domain.Hotplace;
+import com.goorm.domain.Keyword;
 import com.goorm.dto.PostAlbumRequestDto;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -31,8 +33,9 @@ public class HotplaceService {
             List<Hotplace> hotplacesByRegion = hotplaceRepository.findByRegion(region);
 
             for(Hotplace hotplace : hotplacesByRegion) {
-                for(String keyword : keywords) {
-                    if(hotplace.getKeywords().contains(keyword)) {
+                for(Keyword keywordObj : hotplace.getKeywords()) {
+                    String keywordTitle = keywordObj.getKeyword_title();
+                    if(keywords.contains(keywordTitle)) {
                         curatedHotplaces.add(hotplace);
                         break;
                     }
@@ -40,8 +43,14 @@ public class HotplaceService {
             }
         }
 
-        // 10개만 짜르기 (랜덤)
-        return curatedHotplaces;
+        // 10개만 랜덤선택
+        Collections.shuffle(curatedHotplaces);
+        List<Hotplace> hotplaces = new ArrayList<>();
+        for(int i =0; i<Math.min(10, curatedHotplaces.size()); i++) {
+            hotplaces.add(curatedHotplaces.get(i));
+        }
+
+        return hotplaces;
     }
 
     // 4. [Entity] Hotplaces List
