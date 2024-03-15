@@ -3,6 +3,7 @@ package com.goorm.service;
 import com.goorm.domain.AlbumRepository;
 import com.goorm.domain.Album;
 import com.goorm.domain.Hotplace;
+import com.goorm.domain.Keyword;
 import com.goorm.dto.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 //@RequiredArgsConstructor
@@ -43,11 +45,10 @@ public class AlbumService {
                 .addMapping(Hotplace::getHotplace_content, HotplaceDto::setDescription)
                 .addMapping(Hotplace::getHotplace_latitude, HotplaceDto::setLat)
                 .addMapping(Hotplace::getHotplace_longitude, HotplaceDto::setLng)
-                .addMapping(Hotplace::getHotplace_img, HotplaceDto::setImg);
-                //.addMapping(Hotplace::getHotplace_view, HotplaceDto::setHotPlaceList)
-                //.addMapping(Hotplace::getHotplace_like, HotplaceDto::setHotPlaceList)
-                //.addMapping(Hotplace::getHotplace_dislike, HotplaceDto::setHotPlaceList)
-
+                .addMapping(Hotplace::getHotplace_img, HotplaceDto::setImg)
+                .addMapping(Hotplace::getHotplace_view, HotplaceDto::setView)
+                .addMapping(Hotplace::getHotplace_like, HotplaceDto::setLike)
+                .addMapping(Hotplace::getHotplace_dislike, HotplaceDto::setDislike);
     }
 
     // 1. 앨범 카운트 반환
@@ -71,7 +72,14 @@ public class AlbumService {
         List<Hotplace> hotplaces = hotplaceService.curateHotplaces(postAlbumRequestDto);
         List<HotplaceDto> hotplaceDtos = new ArrayList<>();
         for(Hotplace hotplace : hotplaces){
-            hotplaceDtos.add(modelMapper.map(hotplace, HotplaceDto.class));
+            HotplaceDto hDto = modelMapper.map(hotplace, HotplaceDto.class);
+            // keyword 3개만 뽑아 매핑
+            List<String> keyword3 = hotplace.getKeywords().stream()
+                    .map(Keyword::getKeyword_title)
+                    .limit(3)
+                    .collect(Collectors.toList());
+            hDto.setKeywords(keyword3);
+            hotplaceDtos.add(hDto);
         }
 
         postAlbumResponseDto.setHotPlaceList(hotplaceDtos);
@@ -113,11 +121,13 @@ public class AlbumService {
         Optional<Album> albumOptional = albumRepository.findById(aid);
         if(albumOptional.isPresent()){
             GetAlbumResultResponseDto album = modelMapper.map(albumOptional.get(), GetAlbumResultResponseDto.class);
+            for(HotplaceDto hotplaceDto : album.getHotPlaceList()){
+                hotplaceDto.setKeywords(null);
+            }
             return album;
         } else {
             throw new EntityNotFoundException("Album Id: " + aid + "not found");
         }
-        // ? need check HotplaceLists Setting
     }
 
 }
