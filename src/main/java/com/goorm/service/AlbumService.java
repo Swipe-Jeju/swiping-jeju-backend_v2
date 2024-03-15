@@ -1,9 +1,6 @@
 package com.goorm.service;
 
-import com.goorm.domain.AlbumRepository;
-import com.goorm.domain.Album;
-import com.goorm.domain.Hotplace;
-import com.goorm.domain.Keyword;
+import com.goorm.domain.*;
 import com.goorm.dto.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -24,13 +21,16 @@ public class AlbumService {
 
     @Autowired
     private final AlbumRepository albumRepository;
+    @Autowired
+    private final HotplaceRepository hotplaceRepository;
 
     private final HotplaceService hotplaceService;
     private final ModelMapper modelMapper;
 
     @Autowired
-    public AlbumService(AlbumRepository albumRepository, HotplaceService hotplaceService, ModelMapper modelMapper) {
+    public AlbumService(AlbumRepository albumRepository, HotplaceRepository hotplaceRepository, HotplaceService hotplaceService, ModelMapper modelMapper) {
         this.albumRepository = albumRepository;
+        this.hotplaceRepository = hotplaceRepository;
         this.hotplaceService = hotplaceService;
         this.modelMapper = modelMapper;
 
@@ -80,6 +80,8 @@ public class AlbumService {
                     .collect(Collectors.toList());
             hDto.setKeywords(keyword3);
             hotplaceDtos.add(hDto);
+            // Hotplace View count
+            hotplaceRepository.incrementView(hotplace.getHotplace_id());
         }
 
         postAlbumResponseDto.setHotPlaceList(hotplaceDtos);
@@ -102,12 +104,18 @@ public class AlbumService {
 
         if (optionalAlbum.isPresent()){
             Album album = optionalAlbum.get();
-
+            // set Album
             album.setAlbum_title(title);
             album.setAlbum_content(content);
             album.setHotplaces(hotplaces);
-
             albumRepository.save(album);
+
+            // count Hotplace like
+            for(Integer hid : hids) {
+                hotplaceRepository.incrementLike(hid);
+            }
+            // update dislike
+            hotplaceService.countDislike();
         }else{
             throw new EntityNotFoundException("Album Id: " + aid + "not found");
         }

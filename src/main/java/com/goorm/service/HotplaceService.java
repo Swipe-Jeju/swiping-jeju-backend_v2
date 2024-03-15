@@ -70,4 +70,15 @@ public class HotplaceService {
         return hotplaces;
     }
 
+    // sync view-like-dislike
+    public void countDislike(){
+        List<Hotplace> hotplaceToUpdate = hotplaceRepository.findDislikeNeed();
+        for(Hotplace hotplace : hotplaceToUpdate) {
+            int view = hotplace.getHotplace_view();
+            int like = hotplace.getHotplace_like();
+            hotplace.setHotplace_dislike(Math.max(0, view-like));
+            hotplace.setHotplace_like(Math.min(view, like));
+        }
+    }
+
 }
