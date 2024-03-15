@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,13 +24,30 @@ public class AlbumService {
     private final AlbumRepository albumRepository;
 
     private final HotplaceService hotplaceService;
-    private ModelMapper modelMapper;
+    private final ModelMapper modelMapper;
 
     @Autowired
-    public AlbumService(AlbumRepository albumRepository, HotplaceService hotplaceService) {
+    public AlbumService(AlbumRepository albumRepository, HotplaceService hotplaceService, ModelMapper modelMapper) {
         this.albumRepository = albumRepository;
         this.hotplaceService = hotplaceService;
-        this.modelMapper = new ModelMapper();
+        this.modelMapper = modelMapper;
+
+        modelMapper.createTypeMap(Album.class, GetAlbumResultResponseDto.class)
+                .addMapping(Album::getAlbum_id, GetAlbumResultResponseDto::setId)
+                .addMapping(Album::getAlbum_title, GetAlbumResultResponseDto::setTitle)
+                .addMapping(Album::getAlbum_content, GetAlbumResultResponseDto::setContent)
+                .addMapping(Album::getHotplaces, GetAlbumResultResponseDto::setHotPlaceList);
+        modelMapper.createTypeMap(Hotplace.class, HotplaceDto.class)
+                .addMapping(Hotplace::getHotplace_id, HotplaceDto::setId)
+                .addMapping(Hotplace::getHotplace_title, HotplaceDto::setTitle)
+                .addMapping(Hotplace::getHotplace_content, HotplaceDto::setDescription)
+                .addMapping(Hotplace::getHotplace_latitude, HotplaceDto::setLat)
+                .addMapping(Hotplace::getHotplace_longitude, HotplaceDto::setLng)
+                .addMapping(Hotplace::getHotplace_img, HotplaceDto::setImg);
+                //.addMapping(Hotplace::getHotplace_view, HotplaceDto::setHotPlaceList)
+                //.addMapping(Hotplace::getHotplace_like, HotplaceDto::setHotPlaceList)
+                //.addMapping(Hotplace::getHotplace_dislike, HotplaceDto::setHotPlaceList)
+
     }
 
     // 1. 앨범 카운트 반환
@@ -48,10 +66,16 @@ public class AlbumService {
         Album savedAlbum = albumRepository.save(album);
         Integer id = savedAlbum.getAlbum_id();
         postAlbumResponseDto.setId(id);
+
         // 추천 Hotplace 반환
         List<Hotplace> hotplaces = hotplaceService.curateHotplaces(postAlbumRequestDto);
-        postAlbumResponseDto.setHotPlaceList(hotplaces);
+        List<HotplaceDto> hotplaceDtos = new ArrayList<>();
+        for(Hotplace hotplace : hotplaces){
+            hotplaceDtos.add(modelMapper.map(hotplace, HotplaceDto.class));
+        }
 
+        postAlbumResponseDto.setHotPlaceList(hotplaceDtos);
+        // keywords 3r개 + 좋아요/ 싫어요 개수 필요
         return postAlbumResponseDto;
     }
 
@@ -87,10 +111,13 @@ public class AlbumService {
     // 4. 최종앨범으로 반환할 album result
     public GetAlbumResultResponseDto getAlbum(Integer aid) {
         Optional<Album> albumOptional = albumRepository.findById(aid);
-        GetAlbumResultResponseDto album = modelMapper.map(albumOptional, GetAlbumResultResponseDto.class);
+        if(albumOptional.isPresent()){
+            GetAlbumResultResponseDto album = modelMapper.map(albumOptional.get(), GetAlbumResultResponseDto.class);
+            return album;
+        } else {
+            throw new EntityNotFoundException("Album Id: " + aid + "not found");
+        }
         // ? need check HotplaceLists Setting
-
-        return album;
     }
 
 }

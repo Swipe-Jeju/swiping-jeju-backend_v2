@@ -10,5 +10,5 @@ import java.util.List;
 @Getter
 public class PostAlbumResponseDto {
     private Integer id;
-    private List<Hotplace> hotPlaceList;    // entity?dto?
+    private List<HotplaceDto> hotPlaceList;
 }

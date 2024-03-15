@@ -15,5 +15,5 @@ public class HotplaceDto {
     private double lat;
     private double lng;
     private String img;
-    private List<String> keywords;
+    //private List<String> keywords;
 }
