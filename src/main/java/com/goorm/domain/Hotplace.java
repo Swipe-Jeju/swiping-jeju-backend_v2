@@ -18,7 +18,7 @@ public class Hotplace {
     @GeneratedValue (strategy=GenerationType.AUTO)
     private Integer hotplace_id;
 
-    @Column(length=10, nullable=false)
+    @Column(nullable=false)
     private Integer region;
 
     @Column(length=20, nullable=false)
@@ -36,24 +36,19 @@ public class Hotplace {
     @Column(length=255)
     private String hotplace_img;
 
-    @Column(length=10)
+    @Column
     private Integer hotplace_view;
 
-    @Column(length=10)
+    @Column
     private Integer hotplace_like;
 
-    @Column(length=10)
+    @Column
     private Integer hotplace_dislike;
 
     @ManyToMany(mappedBy="hotplaces")
     private List<Album> albums = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "KeywordHotplace",
-            joinColumns = @JoinColumn(name="hotplace_id"),
-            inverseJoinColumns = @JoinColumn(name="keyword_id")
-    )
+    @ManyToMany(mappedBy="hotplaces")
     private List<Keyword> keywords = new ArrayList<>();
 
     @Builder

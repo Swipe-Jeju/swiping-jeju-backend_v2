@@ -1,6 +1,5 @@
 package com.goorm.domain;
 
-import com.goorm.domain.Hotplace;
 import jakarta.persistence.*;
 
 import lombok.Builder;
@@ -23,7 +22,12 @@ public class Keyword {
     @Column(length =20, nullable=false)
     private String keyword_title;
 
-    @ManyToMany(mappedBy="keywords")
+    @ManyToMany
+    @JoinTable(
+            name = "KeywordHotplace",
+            joinColumns = @JoinColumn(name="keyword_id"),
+            inverseJoinColumns = @JoinColumn(name="hotplace_id")
+    )
     private List<Hotplace> hotplaces = new ArrayList<>();
 
     @Builder
